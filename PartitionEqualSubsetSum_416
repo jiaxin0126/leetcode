@@ -1,0 +1,116 @@
+package DP;
+
+import java.util.Arrays;
+
+/**
+ *Input: [1, 5, 11, 5]
+
+Output: true
+
+Explanation: The array can be partitioned as [1, 5, 5] and [11].
+ *
+ */
+public class A9_2_PartitionEqualSubsetSum_416 {
+
+	public static void main(String[] args) {
+		int[] nums={1,5,11,5};
+		
+
+	}
+	 /**
+	 * 1、依然数组的和必须要是偶数，否则无法划分，共计n个数,这里价值value/weight都等于nums 
+2、将问题转化为背包问题，即取前I个数（物品），和体积j下，dp[i][j]的最大值 
+dp[i][j]=max{ dp[i-1][j], dp[i-1][j-nums[i]]+nums[i] }。 
+3、这样dp[n][sum/2] 如果等于sum/2 就证明用了这n个数下，正好能加出一个sum/2，所以就自然而然的通过了
+	 */
+	public boolean canPartition1(int[] nums) {
+		 if(nums==null || nums.length<=0)
+			 return false;
+		 int sum = 0;
+		 for(int n:nums){
+			 sum+=n;
+		 }
+		 if(sum%2==1){
+			 return false;
+		 }else{
+			 Arrays.sort(nums);
+			 sum/=2;
+			 int[][] dp=new int[nums.length][sum+1];
+			 //初始化
+			 for(int i=nums[0];i<=sum;i++){
+				 dp[0][i]=nums[0];
+			 }
+			 //遍历
+			 for(int i=1;i<nums.length;i++){
+				 for(int j=nums[i];j<=sum;j++){
+					 dp[i][j]=Math.max(dp[i-1][j], dp[i-1][j-nums[i]]+nums[i]);
+				 }
+			 }
+			 if(dp[nums.length-1][sum]==sum){
+				 return true;}
+			 else{
+				 return false;
+			 }	 
+			
+		 }    
+	 }
+	
+	
+	 /**定义一个一维的dp数组，其中dp[i]表示数字i是否是原数组的任意个子集合之和，
+	  * 那么我们我们最后只需要返回dp[target]就行了。我们初始化dp[0]为true，
+	  * 由于题目中限制了所有数字为正数，那么我们就不用担心会出现和为0或者负数的情况。
+	  * 那么关键问题就是要找出递归公式了，我们需要遍历原数组中的数字，
+	  * 对于遍历到的每个数字nums[i]，我们需要更新我们的dp数组，要更新[nums[i], target]之间的值，
+	  * 那么对于这个区间中的任意一个数字j，如果dp[j - nums[j]]为true的话，
+	  * 那么dp[j]就一定为true，于是地推公式如下：
+
+
+dp[j] = dp[j] || dp[j - nums[i]]         (nums[i] <= j <= target，要倒序来算)
+
+
+
+例如：1  5  3
+
+              index：   0   1   2   3   4   5   6   7   8   9
+
+     加入1时{1}：   1    1                                              {1}时，得到2个不同的和
+
+   加入5时{1,5}：  1    1                 1   1                       来了5之后，在原来的基础上，多了5和6,共4个不同的和
+
+加入3时{1,5,3}：  1    1        1   1   1   1       1   1         加入3之后，由原来的4个和变成8个和。
+
+
+
+这个dp过程是：{1} -> {1,5} -> {1,5,3} ,每次计算，我们都要利用前一个状态的计算结果（例如，计算{1,5,3}时，
+需要用到{1,5}的结果，而{1,5}的结果已经计算好并保存在dp[target+1]中），这正是dp中关键的思想。
+	 * @param nums
+	 * @return
+	 */
+	public boolean canPartition2(int[] nums) {
+	        // check edge case
+	        if (nums == null || nums.length == 0) {
+	            return true;
+	        }
+	        // preprocess
+	        int volumn = 0;
+	        for (int num : nums) {
+	            volumn += num;
+	        }
+	        if (volumn % 2 != 0) {
+	            return false;
+	        }
+	        volumn /= 2;
+	        // dp def
+	        boolean[] dp = new boolean[volumn + 1];
+	        // dp init
+	        dp[0] = true;
+	        // dp transition
+	        for (int i = 1; i <= nums.length; i++) {
+	            for (int j = volumn; j >= nums[i-1]; j--) {
+	                dp[j] = dp[j] || dp[j - nums[i-1]];
+	            }
+	        }
+	        return dp[volumn];
+	    }
+
+}
